@@ -18,6 +18,25 @@ export async function analyzeCV(formData: FormData) {
     throw new Error("No CV file was provided.");
   }
 
+  const allowedTypes = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  const maxFileSize = 5 * 1024 * 1024;
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      "Unsupported file type. Please upload a PDF or DOCX file."
+    );
+  }
+
+  if (file.size > maxFileSize) {
+    throw new Error(
+      "File is too large. Maximum file size is 5 MB."
+    );
+  }
+
   const targetRoleValue = formData.get("targetRole");
 
   const targetRole =
