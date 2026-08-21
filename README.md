@@ -222,7 +222,7 @@ The next development phase focuses on improving the AI analysis engine and expan
 
 ## Author
 
-**Muhammad Ehsan**
+**Muhammad Ahsan**
 
 BS Software Engineering student and developer building Hirely as an AI-focused software project.
 
