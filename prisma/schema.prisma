@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cvs      CV[]
+  analyses Analysis[]
+  settings UserSettings?
+}
+
+model CV {
+  id               String   @id @default(cuid())
+  userId           String
+  originalFilename String
+  fileLocation     String
+  fileType         String
+  extractedData    Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses Analysis[]
+}
+
+model Analysis {
+  id           String   @id @default(cuid())
+  userId       String
+  cvId         String
+  targetRole   String?
+  overallScore Int?
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cv     CV              @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  result AnalysisResult?
+}
+
+model AnalysisResult {
+  id              String   @id @default(cuid())
+  analysisId      String   @unique
+  overview        String?
+  strengths       Json?
+  weaknesses      Json?
+  skillsAnalysis  Json?
+  sectionFeedback Json?
+  recommendations Json?
+  createdAt       DateTime @default(now())
+
+  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+}
+
+model UserSettings {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  theme                   String   @default("system")
+  preferredLanguage       String   @default("en")
+  notificationPreferences Json?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
