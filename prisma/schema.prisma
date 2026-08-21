@@ -7,11 +7,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  authUserId String   @unique
+  name       String
+  email      String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   cvs      CV[]
   analyses Analysis[]
@@ -24,6 +25,7 @@ model CV {
   originalFilename String
   fileLocation     String
   fileType         String
+  extractedText    String?
   extractedData    Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -47,17 +49,28 @@ model Analysis {
 }
 
 model AnalysisResult {
-  id              String   @id @default(cuid())
-  analysisId      String   @unique
-  overview        String?
-  strengths       Json?
-  weaknesses      Json?
-  skillsAnalysis  Json?
-  sectionFeedback Json?
-  recommendations Json?
-  createdAt       DateTime @default(now())
+  id                  String   @id @default(cuid())
+  analysisId          String   @unique
 
-  analysis Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  overallScore        Int?
+  scoreBreakdown      Json?
+  verdict             String?
+  overview            String?
+
+  recruiterImpression Json?
+  strengths           Json?
+  weaknesses          Json?
+  skillsAnalysis      Json?
+  experienceAnalysis  Json?
+  projectsAnalysis    Json?
+  sectionFeedback     Json?
+  atsAnalysis         Json?
+  missingEvidence     Json?
+  recommendations     Json?
+
+  createdAt            DateTime @default(now())
+
+  analysis            Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
 }
 
 model UserSettings {
