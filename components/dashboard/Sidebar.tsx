@@ -68,9 +68,13 @@ const bottomNavigation = [
 function NavigationItem({
   item,
   pathname,
+  collapsed,
+  onNavigate,
 }: {
   item: (typeof navigation)[number];
   pathname: string;
+  collapsed: boolean;
+  onNavigate?: () => void;
 }) {
   const active =
     item.href === "/dashboard"
@@ -80,69 +84,101 @@ function NavigationItem({
   return (
     <Link
       href={item.href}
-      className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-        active
+      onClick={onNavigate}
+      title={collapsed ? item.name : undefined}
+      className={`group flex items-center rounded-lg py-2.5 text-sm font-medium transition-all duration-150 ${collapsed
+          ? "justify-center px-2"
+          : "gap-3 px-3"
+        } ${active
           ? "bg-accent text-foreground"
           : "text-muted-foreground hover:bg-accent hover:text-foreground"
-      }`}
+        }`}
     >
       <span className="h-[17px] w-[17px] shrink-0">
         {item.icon}
       </span>
 
-      <span>{item.name}</span>
+      {!collapsed && (
+        <span className="truncate">
+          {item.name}
+        </span>
+      )}
     </Link>
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({
+  collapsed,
+  mobileOpen,
+  onCloseMobile,
+}: {
+  collapsed: boolean;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r bg-background">
-      {/* Brand */}
-      <div className="flex h-16 shrink-0 items-center border-b px-5">
-        <Link
-          href="/dashboard"
-          className="text-lg font-semibold tracking-tight"
-        >
-          Hirely
-        </Link>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <button
+          type="button"
+          aria-label="Close navigation"
+          onClick={onCloseMobile}
+          className="fixed inset-0 top-16 z-40 bg-black/20 md:hidden"
+        />
+      )}
 
-      {/* Main navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
-        <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Workspace
-        </p>
+      <aside
+        className={`fixed bottom-0 left-0 z-50 flex flex-col border-r bg-background transition-all duration-200 ${collapsed ? "w-16" : "w-64"
+          } ${mobileOpen
+            ? "top-16 translate-x-0"
+            : "top-16 -translate-x-full"
+          } md:translate-x-0`}
+      >
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          {!collapsed && (
+            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Workspace
+            </p>
+          )}
 
-        <div className="space-y-1">
-          {navigation.map((item) => (
-            <NavigationItem
-              key={item.href}
-              item={item}
-              pathname={pathname}
-            />
-          ))}
+          <div className="space-y-1">
+            {navigation.map((item) => (
+              <NavigationItem
+                key={item.href}
+                item={item}
+                pathname={pathname}
+                collapsed={collapsed}
+                onNavigate={onCloseMobile}
+              />
+            ))}
+          </div>
+        </nav>
+
+        {/* Account navigation */}
+        <div className="shrink-0 border-t p-3">
+          {!collapsed && (
+            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Personal
+            </p>
+          )}
+
+          <div className="space-y-1">
+            {bottomNavigation.map((item) => (
+              <NavigationItem
+                key={item.href}
+                item={item}
+                pathname={pathname}
+                collapsed={collapsed}
+                onNavigate={onCloseMobile}
+              />
+            ))}
+          </div>
         </div>
-      </nav>
-
-      {/* Account navigation */}
-      <div className="shrink-0 border-t p-3">
-        <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Personal
-        </p>
-
-        <div className="space-y-1">
-          {bottomNavigation.map((item) => (
-            <NavigationItem
-              key={item.href}
-              item={item}
-              pathname={pathname}
-            />
-          ))}
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
