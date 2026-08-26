@@ -513,14 +513,60 @@ ${normalizedCV}
 ---
 `;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: analysisJsonSchema,
-    },
-  });
+  let response;
+  let lastError: unknown;
+
+  const MAX_ATTEMPTS = 3;
+  const RETRY_DELAYS = [0, 2000, 5000];
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (RETRY_DELAYS[attempt] > 0) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, RETRY_DELAYS[attempt])
+      );
+    }
+
+    try {
+      response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: analysisJsonSchema,
+        },
+      });
+
+      break;
+    } catch (error) {
+      lastError = error;
+
+      const status =
+        typeof error === "object" &&
+        error !== null &&
+        "status" in error
+          ? (error as { status?: number }).status
+          : undefined;
+
+      const isRetryable =
+        status === 429 ||
+        status === 500 ||
+        status === 502 ||
+        status === 503 ||
+        status === 504;
+
+      if (!isRetryable || attempt === MAX_ATTEMPTS - 1) {
+        throw error;
+      }
+
+      console.warn(
+        `Gemini request failed with status ${status}. Retrying... (${attempt + 1}/${MAX_ATTEMPTS})`
+      );
+    }
+  }
+
+  if (!response) {
+    throw lastError ?? new Error("Gemini request failed.");
+  }
 
   if (!response.text) {
     throw new Error("Gemini returned an empty response.");
