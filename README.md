@@ -220,6 +220,16 @@ The core Hirely application is functional, including authentication, CV analysis
 
 The next development phase focuses on improving the AI analysis engine and expanding the depth and usefulness of the generated insights.
 
+## AI Usage
+
+AI is a core part of Hirely's functionality and development process.
+
+**Google Gemini** powers the CV analysis feature, processing extracted CV content to identify strengths, weaknesses, skill gaps, and provide structured career insights and recommendations.
+
+During development, **ChatGPT** and **Claude** were used as AI-assisted development and reasoning tools for architecture decisions, debugging, code review, prompt refinement, documentation, and exploring implementation approaches.
+
+All AI-generated suggestions and code were reviewed, adapted, tested, and validated before being integrated into the project. AI was used as a development assistant rather than a replacement for engineering judgment.
+
 ## Author
 
 **Muhammad Ahsan**
