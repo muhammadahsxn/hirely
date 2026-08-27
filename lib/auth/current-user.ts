@@ -10,9 +10,20 @@ export async function getCurrentUser() {
     return null;
   }
 
-  return prisma.user.findUnique({
+  const user = await prisma.user.upsert({
     where: {
       authUserId: authUser.id,
     },
+    update: {
+      name: authUser.name,
+      email: authUser.email,
+    },
+    create: {
+      authUserId: authUser.id,
+      name: authUser.name,
+      email: authUser.email,
+    },
   });
+
+  return user;
 }
